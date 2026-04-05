@@ -1,0 +1,371 @@
+@using System.Threading
+@using Microsoft.JSInterop
+@using Soenneker.Blazor.Quill.Abstract
+@using Soenneker.Blazor.Quill.Dtos
+@using Soenneker.Blazor.Quill.Options
+
+@inject IQuillInterop QuillInterop
+@implements IAsyncDisposable
+
+<div id="@Id" class="@Class" style="@Style" @attributes="Attributes"></div>
+
+@code {
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+    private QuillEventBridge? _eventBridge;
+    private DotNetObjectReference<QuillEventBridge>? _eventBridgeReference;
+
+    private bool _created;
+    private string? _lastHtml;
+    private string? _lastText;
+    private string? _lastContentsJson;
+    private string? _lastIncomingHtml;
+    private string? _lastIncomingText;
+    private string? _lastIncomingContentsJson;
+    private bool _pendingHtmlSync;
+    private bool _pendingTextSync;
+    private bool _pendingContentsSync;
+
+    [Parameter]
+    public string? Id { get; set; }
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    [Parameter]
+    public string? Style { get; set; }
+
+    [Parameter]
+    public QuillOptions Options { get; set; } = new();
+
+    [Parameter]
+    public string? Html { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> HtmlChanged { get; set; }
+
+    [Parameter]
+    public string? Text { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> TextChanged { get; set; }
+
+    [Parameter]
+    public string? ContentsJson { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ContentsJsonChanged { get; set; }
+
+    [Parameter]
+    public EventCallback OnReady { get; set; }
+
+    [Parameter]
+    public EventCallback<QuillTextChange> OnTextChange { get; set; }
+
+    [Parameter]
+    public EventCallback<QuillSelectionChange> OnSelectionChange { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? Attributes { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        Id ??= $"quill-{Guid.NewGuid():N}";
+
+        if (_lastIncomingHtml != Html)
+        {
+            _lastIncomingHtml = Html;
+            _pendingHtmlSync = true;
+        }
+
+        if (_lastIncomingText != Text)
+        {
+            _lastIncomingText = Text;
+            _pendingTextSync = true;
+        }
+
+        if (_lastIncomingContentsJson != ContentsJson)
+        {
+            _lastIncomingContentsJson = ContentsJson;
+            _pendingContentsSync = true;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !Options.ManualCreate)
+        {
+            await Create(cancellationToken: _cancellationTokenSource.Token);
+            return;
+        }
+
+        if (!_created)
+            return;
+
+        await SyncParametersToEditor(_cancellationTokenSource.Token);
+    }
+
+    public async ValueTask Create(QuillOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        if (_created)
+            return;
+
+        if (options != null)
+            Options = options;
+
+        _eventBridge = new QuillEventBridge(HandleReady, HandleTextChanged, HandleSelectionChanged);
+        _eventBridgeReference = DotNetObjectReference.Create(_eventBridge);
+
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+
+        using (source)
+        {
+            await QuillInterop.Create(Id!, _eventBridgeReference, Options, linked);
+            _created = true;
+
+            await ApplyInitialValue(linked);
+        }
+    }
+
+    public async ValueTask<string?> GetHtml(CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+
+        using (source)
+            return await QuillInterop.GetHtml(Id!, linked);
+    }
+
+    public async ValueTask<string> GetText(CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+
+        using (source)
+            return await QuillInterop.GetText(Id!, linked);
+    }
+
+    public async ValueTask<string> GetContents(CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+
+        using (source)
+            return await QuillInterop.GetContents(Id!, linked);
+    }
+
+    public async ValueTask SetHtml(string? html, string source = "api", CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource linkedSource);
+
+        using (linkedSource)
+        {
+            await QuillInterop.SetHtml(Id!, html, source, linked);
+            _lastHtml = html;
+        }
+    }
+
+    public async ValueTask SetText(string? text, string source = "api", CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource linkedSource);
+
+        using (linkedSource)
+        {
+            await QuillInterop.SetText(Id!, text, source, linked);
+            _lastText = text;
+        }
+    }
+
+    public async ValueTask SetContents(string contentsJson, string source = "api", CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource linkedSource);
+
+        using (linkedSource)
+        {
+            await QuillInterop.SetContents(Id!, contentsJson, source, linked);
+            _lastContentsJson = contentsJson;
+        }
+    }
+
+    public ValueTask Clear(string source = "api", CancellationToken cancellationToken = default)
+    {
+        return SetText(string.Empty, source, cancellationToken);
+    }
+
+    public async ValueTask Focus(CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+
+        using (source)
+            await QuillInterop.Focus(Id!, linked);
+    }
+
+    public async ValueTask Blur(CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+
+        using (source)
+            await QuillInterop.Blur(Id!, linked);
+    }
+
+    public async ValueTask Enable(bool enabled = true, CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+
+        using (source)
+            await QuillInterop.Enable(Id!, enabled, linked);
+    }
+
+    public async ValueTask<QuillSelectionRange?> GetSelection(CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+
+        using (source)
+            return await QuillInterop.GetSelection(Id!, linked);
+    }
+
+    public async ValueTask SetSelection(int index, int length = 0, string source = "api", CancellationToken cancellationToken = default)
+    {
+        EnsureCreated();
+
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource linkedSource);
+
+        using (linkedSource)
+            await QuillInterop.SetSelection(Id!, index, length, source, linked);
+    }
+
+    private async ValueTask ApplyInitialValue(CancellationToken cancellationToken)
+    {
+        if (Html != null)
+        {
+            await QuillInterop.SetHtml(Id!, Html, "api", cancellationToken);
+            _lastHtml = Html;
+            _pendingHtmlSync = false;
+            return;
+        }
+
+        if (ContentsJson != null)
+        {
+            await QuillInterop.SetContents(Id!, ContentsJson, "api", cancellationToken);
+            _lastContentsJson = ContentsJson;
+            _pendingContentsSync = false;
+            return;
+        }
+
+        if (Text != null)
+        {
+            await QuillInterop.SetText(Id!, Text, "api", cancellationToken);
+            _lastText = Text;
+            _pendingTextSync = false;
+        }
+    }
+
+    private async ValueTask SyncParametersToEditor(CancellationToken cancellationToken)
+    {
+        if (_pendingHtmlSync)
+        {
+            _pendingHtmlSync = false;
+
+            if (Html != _lastHtml)
+            {
+                await QuillInterop.SetHtml(Id!, Html, "api", cancellationToken);
+                _lastHtml = Html;
+            }
+
+            return;
+        }
+
+        if (_pendingContentsSync)
+        {
+            _pendingContentsSync = false;
+
+            if (ContentsJson != _lastContentsJson && ContentsJson != null)
+            {
+                await QuillInterop.SetContents(Id!, ContentsJson, "api", cancellationToken);
+                _lastContentsJson = ContentsJson;
+            }
+
+            return;
+        }
+
+        if (_pendingTextSync)
+        {
+            _pendingTextSync = false;
+
+            if (Text != _lastText)
+            {
+                await QuillInterop.SetText(Id!, Text, "api", cancellationToken);
+                _lastText = Text;
+            }
+        }
+    }
+
+    private async ValueTask HandleReady()
+    {
+        await OnReady.InvokeAsync();
+    }
+
+    private async ValueTask HandleTextChanged(QuillTextChange change)
+    {
+        _lastHtml = change.Html;
+        _lastText = change.Text;
+        _lastContentsJson = change.ContentsJson;
+
+        await HtmlChanged.InvokeAsync(change.Html);
+        await TextChanged.InvokeAsync(change.Text);
+        await ContentsJsonChanged.InvokeAsync(change.ContentsJson);
+        await OnTextChange.InvokeAsync(change);
+    }
+
+    private async ValueTask HandleSelectionChanged(QuillSelectionChange change)
+    {
+        await OnSelectionChange.InvokeAsync(change);
+    }
+
+    private static void EnsureCreated(bool created, string elementId)
+    {
+        if (!created)
+            throw new InvalidOperationException($"Quill editor '{elementId}' has not been created yet.");
+    }
+
+    private void EnsureCreated()
+    {
+        EnsureCreated(_created, Id!);
+    }
+
+    private CancellationToken LinkCancellationToken(CancellationToken cancellationToken, out CancellationTokenSource source)
+    {
+        source = CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token, cancellationToken);
+        return source.Token;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_created)
+            await QuillInterop.Destroy(Id!, CancellationToken.None);
+
+        _eventBridgeReference?.Dispose();
+        _eventBridgeReference = null;
+        _eventBridge = null;
+
+        await _cancellationTokenSource.CancelAsync();
+        _cancellationTokenSource.Dispose();
+    }
+}
