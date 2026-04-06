@@ -85,8 +85,9 @@ function disposeInstance(elementId) {
     quillInstances.delete(elementId);
 }
 
-export class QuillInterop {
-    create(elementId, dotNetReference, options) {
+const interop = (() => {
+    const instance = {};
+    instance.create = function(elementId, dotNetReference, options) {
         disposeInstance(elementId);
 
         const normalized = normalizeOptions(options);
@@ -123,9 +124,9 @@ export class QuillInterop {
         });
 
         dotNetReference.invokeMethodAsync("OnReady");
-    }
+    };
 
-    destroy(elementId) {
+    instance.destroy = function(elementId) {
         const instance = quillInstances.get(elementId);
 
         if (!instance) {
@@ -140,14 +141,14 @@ export class QuillInterop {
         element.innerHTML = "";
 
         quillInstances.delete(elementId);
-    }
+    };
 
-    getHtml(elementId) {
+    instance.getHtml = function(elementId) {
         const { quill } = getRequiredInstance(elementId);
         return quill.root?.innerHTML ?? "";
-    }
+    };
 
-    setHtml(elementId, html, source = "api") {
+    instance.setHtml = function(elementId, html, source = "api") {
         const { quill } = getRequiredInstance(elementId);
 
         if (!html) {
@@ -156,53 +157,104 @@ export class QuillInterop {
         }
 
         quill.clipboard.dangerouslyPasteHTML(html, source);
-    }
+    };
 
-    getText(elementId) {
+    instance.getText = function(elementId) {
         const { quill } = getRequiredInstance(elementId);
         return quill.getText();
-    }
+    };
 
-    setText(elementId, text, source = "api") {
+    instance.setText = function(elementId, text, source = "api") {
         const { quill } = getRequiredInstance(elementId);
         quill.setText(text ?? "", source);
-    }
+    };
 
-    getContents(elementId) {
+    instance.getContents = function(elementId) {
         const { quill } = getRequiredInstance(elementId);
         return JSON.stringify(quill.getContents());
-    }
+    };
 
-    setContents(elementId, contentsJson, source = "api") {
+    instance.setContents = function(elementId, contentsJson, source = "api") {
         const { quill } = getRequiredInstance(elementId);
         const contents = JSON.parse(contentsJson);
         quill.setContents(contents, source);
-    }
+    };
 
-    enable(elementId, enabled = true) {
+    instance.enable = function(elementId, enabled = true) {
         const { quill } = getRequiredInstance(elementId);
         quill.enable(enabled);
-    }
+    };
 
-    focus(elementId) {
+    instance.focus = function(elementId) {
         const { quill } = getRequiredInstance(elementId);
         quill.focus();
-    }
+    };
 
-    blur(elementId) {
+    instance.blur = function(elementId) {
         const { quill } = getRequiredInstance(elementId);
         quill.blur();
-    }
+    };
 
-    getSelection(elementId) {
+    instance.getSelection = function(elementId) {
         const { quill } = getRequiredInstance(elementId);
         return toSelectionRange(quill.getSelection());
-    }
+    };
 
-    setSelection(elementId, index, length = 0, source = "api") {
+    instance.setSelection = function(elementId, index, length = 0, source = "api") {
         const { quill } = getRequiredInstance(elementId);
         quill.setSelection(index, length, source);
-    }
+    };
+
+    return instance;
+})();
+export function create(elementId, dotNetReference, options) {
+    return interop.create(elementId, dotNetReference, options);
 }
 
-window.QuillInterop = new QuillInterop();
+export function destroy(elementId) {
+    return interop.destroy(elementId);
+}
+
+export function getHtml(elementId) {
+    return interop.getHtml(elementId);
+}
+
+export function setHtml(elementId, html, source = "api") {
+    return interop.setHtml(elementId, html, source);
+}
+
+export function getText(elementId) {
+    return interop.getText(elementId);
+}
+
+export function setText(elementId, text, source = "api") {
+    return interop.setText(elementId, text, source);
+}
+
+export function getContents(elementId) {
+    return interop.getContents(elementId);
+}
+
+export function setContents(elementId, contentsJson, source = "api") {
+    return interop.setContents(elementId, contentsJson, source);
+}
+
+export function enable(elementId, enabled = true) {
+    return interop.enable(elementId, enabled);
+}
+
+export function focus(elementId) {
+    return interop.focus(elementId);
+}
+
+export function blur(elementId) {
+    return interop.blur(elementId);
+}
+
+export function getSelection(elementId) {
+    return interop.getSelection(elementId);
+}
+
+export function setSelection(elementId, index, length = 0, source = "api") {
+    return interop.setSelection(elementId, index, length, source);
+}
