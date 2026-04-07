@@ -29,7 +29,7 @@ public sealed class QuillInterop : IQuillInterop
     private readonly SemaphoreSlim _styleSemaphore = new(1, 1);
     private readonly CancellationScope _cancellationScope = new();
 
-    public QuillInterop(IJSRuntime jsRuntime, IResourceLoader resourceLoader, IModuleImportUtil moduleImportUtil)
+    public QuillInterop(IResourceLoader resourceLoader, IModuleImportUtil moduleImportUtil)
     {
         _resourceLoader = resourceLoader;
         _moduleImportUtil = moduleImportUtil;

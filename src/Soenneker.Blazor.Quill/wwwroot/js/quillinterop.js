@@ -11,13 +11,13 @@ function getRequiredElement(elementId) {
 }
 
 function getRequiredInstance(elementId) {
-    const instance = quillInstances.get(elementId);
+    const inst = quillInstances.get(elementId);
 
-    if (!instance) {
+    if (!inst) {
         throw new Error(`Quill editor '${elementId}' has not been created.`);
     }
 
-    return instance;
+    return inst;
 }
 
 function normalizeOptions(options) {
@@ -74,187 +74,131 @@ function toSelectionChangePayload(range, oldRange, source) {
 }
 
 function disposeInstance(elementId) {
-    const instance = quillInstances.get(elementId);
+    const inst = quillInstances.get(elementId);
 
-    if (!instance) {
+    if (!inst) {
         return;
     }
 
-    instance.quill.off("text-change", instance.onTextChange);
-    instance.quill.off("selection-change", instance.onSelectionChange);
+    inst.quill.off("text-change", inst.onTextChange);
+    inst.quill.off("selection-change", inst.onSelectionChange);
     quillInstances.delete(elementId);
 }
 
-const interop = (() => {
-    const instance = {};
-    instance.create = function(elementId, dotNetReference, options) {
-        disposeInstance(elementId);
-
-        const normalized = normalizeOptions(options);
-        const element = getRequiredElement(elementId);
-
-        element.innerHTML = "";
-
-        const quill = new Quill(element, {
-            theme: normalized.theme,
-            placeholder: normalized.placeholder ?? undefined,
-            readOnly: normalized.readOnly,
-            bounds: normalized.bounds ?? undefined,
-            debug: normalized.debug ?? false,
-            formats: normalized.formats ?? undefined,
-            modules: normalized.modules ?? undefined
-        });
-
-        const onTextChange = (delta, oldDelta, source) => {
-            dotNetReference.invokeMethodAsync("OnTextChanged", toTextChangePayload(quill, delta, oldDelta, source));
-        };
-
-        const onSelectionChange = (range, oldRange, source) => {
-            dotNetReference.invokeMethodAsync("OnSelectionChanged", toSelectionChangePayload(range, oldRange, source));
-        };
-
-        quill.on("text-change", onTextChange);
-        quill.on("selection-change", onSelectionChange);
-
-        quillInstances.set(elementId, {
-            quill,
-            onTextChange,
-            onSelectionChange,
-            dotNetReference
-        });
-
-        dotNetReference.invokeMethodAsync("OnReady");
-    };
-
-    instance.destroy = function(elementId) {
-        const instance = quillInstances.get(elementId);
-
-        if (!instance) {
-            return;
-        }
-
-        instance.quill.off("text-change", instance.onTextChange);
-        instance.quill.off("selection-change", instance.onSelectionChange);
-        instance.quill.root?.blur();
-
-        const element = getRequiredElement(elementId);
-        element.innerHTML = "";
-
-        quillInstances.delete(elementId);
-    };
-
-    instance.getHtml = function(elementId) {
-        const { quill } = getRequiredInstance(elementId);
-        return quill.root?.innerHTML ?? "";
-    };
-
-    instance.setHtml = function(elementId, html, source = "api") {
-        const { quill } = getRequiredInstance(elementId);
-
-        if (!html) {
-            quill.setText("", source);
-            return;
-        }
-
-        quill.clipboard.dangerouslyPasteHTML(html, source);
-    };
-
-    instance.getText = function(elementId) {
-        const { quill } = getRequiredInstance(elementId);
-        return quill.getText();
-    };
-
-    instance.setText = function(elementId, text, source = "api") {
-        const { quill } = getRequiredInstance(elementId);
-        quill.setText(text ?? "", source);
-    };
-
-    instance.getContents = function(elementId) {
-        const { quill } = getRequiredInstance(elementId);
-        return JSON.stringify(quill.getContents());
-    };
-
-    instance.setContents = function(elementId, contentsJson, source = "api") {
-        const { quill } = getRequiredInstance(elementId);
-        const contents = JSON.parse(contentsJson);
-        quill.setContents(contents, source);
-    };
-
-    instance.enable = function(elementId, enabled = true) {
-        const { quill } = getRequiredInstance(elementId);
-        quill.enable(enabled);
-    };
-
-    instance.focus = function(elementId) {
-        const { quill } = getRequiredInstance(elementId);
-        quill.focus();
-    };
-
-    instance.blur = function(elementId) {
-        const { quill } = getRequiredInstance(elementId);
-        quill.blur();
-    };
-
-    instance.getSelection = function(elementId) {
-        const { quill } = getRequiredInstance(elementId);
-        return toSelectionRange(quill.getSelection());
-    };
-
-    instance.setSelection = function(elementId, index, length = 0, source = "api") {
-        const { quill } = getRequiredInstance(elementId);
-        quill.setSelection(index, length, source);
-    };
-
-    return instance;
-})();
 export function create(elementId, dotNetReference, options) {
-    return interop.create(elementId, dotNetReference, options);
+    disposeInstance(elementId);
+
+    const normalized = normalizeOptions(options);
+    const element = getRequiredElement(elementId);
+
+    element.innerHTML = "";
+
+    const quill = new Quill(element, {
+        theme: normalized.theme,
+        placeholder: normalized.placeholder ?? undefined,
+        readOnly: normalized.readOnly,
+        bounds: normalized.bounds ?? undefined,
+        debug: normalized.debug ?? false,
+        formats: normalized.formats ?? undefined,
+        modules: normalized.modules ?? undefined
+    });
+
+    const onTextChange = (delta, oldDelta, source) => {
+        dotNetReference.invokeMethodAsync("OnTextChanged", toTextChangePayload(quill, delta, oldDelta, source));
+    };
+
+    const onSelectionChange = (range, oldRange, source) => {
+        dotNetReference.invokeMethodAsync("OnSelectionChanged", toSelectionChangePayload(range, oldRange, source));
+    };
+
+    quill.on("text-change", onTextChange);
+    quill.on("selection-change", onSelectionChange);
+
+    quillInstances.set(elementId, {
+        quill,
+        onTextChange,
+        onSelectionChange,
+        dotNetReference
+    });
+
+    dotNetReference.invokeMethodAsync("OnReady");
 }
 
 export function destroy(elementId) {
-    return interop.destroy(elementId);
+    const inst = quillInstances.get(elementId);
+
+    if (!inst) {
+        return;
+    }
+
+    inst.quill.off("text-change", inst.onTextChange);
+    inst.quill.off("selection-change", inst.onSelectionChange);
+    inst.quill.root?.blur();
+
+    const element = getRequiredElement(elementId);
+    element.innerHTML = "";
+
+    quillInstances.delete(elementId);
 }
 
 export function getHtml(elementId) {
-    return interop.getHtml(elementId);
+    const { quill } = getRequiredInstance(elementId);
+    return quill.root?.innerHTML ?? "";
 }
 
 export function setHtml(elementId, html, source = "api") {
-    return interop.setHtml(elementId, html, source);
+    const { quill } = getRequiredInstance(elementId);
+
+    if (!html) {
+        quill.setText("", source);
+        return;
+    }
+
+    quill.clipboard.dangerouslyPasteHTML(html, source);
 }
 
 export function getText(elementId) {
-    return interop.getText(elementId);
+    const { quill } = getRequiredInstance(elementId);
+    return quill.getText();
 }
 
 export function setText(elementId, text, source = "api") {
-    return interop.setText(elementId, text, source);
+    const { quill } = getRequiredInstance(elementId);
+    quill.setText(text ?? "", source);
 }
 
 export function getContents(elementId) {
-    return interop.getContents(elementId);
+    const { quill } = getRequiredInstance(elementId);
+    return JSON.stringify(quill.getContents());
 }
 
 export function setContents(elementId, contentsJson, source = "api") {
-    return interop.setContents(elementId, contentsJson, source);
+    const { quill } = getRequiredInstance(elementId);
+    const contents = JSON.parse(contentsJson);
+    quill.setContents(contents, source);
 }
 
 export function enable(elementId, enabled = true) {
-    return interop.enable(elementId, enabled);
+    const { quill } = getRequiredInstance(elementId);
+    quill.enable(enabled);
 }
 
 export function focus(elementId) {
-    return interop.focus(elementId);
+    const { quill } = getRequiredInstance(elementId);
+    quill.focus();
 }
 
 export function blur(elementId) {
-    return interop.blur(elementId);
+    const { quill } = getRequiredInstance(elementId);
+    quill.blur();
 }
 
 export function getSelection(elementId) {
-    return interop.getSelection(elementId);
+    const { quill } = getRequiredInstance(elementId);
+    return toSelectionRange(quill.getSelection());
 }
 
 export function setSelection(elementId, index, length = 0, source = "api") {
-    return interop.setSelection(elementId, index, length, source);
+    const { quill } = getRequiredInstance(elementId);
+    quill.setSelection(index, length, source);
 }
