@@ -18,7 +18,7 @@ namespace Soenneker.Blazor.Quill;
 /// <inheritdoc cref="IQuillInterop"/>
 public sealed class QuillInterop : IQuillInterop
 {
-    private const string _modulePath = "/_content/Soenneker.Blazor.Quill/js/quillinterop.js";
+    private const string _modulePath = "_content/Soenneker.Blazor.Quill/js/quillinterop.js";
     private const string _quillVariable = "Quill";
 
     private readonly IResourceLoader _resourceLoader;
