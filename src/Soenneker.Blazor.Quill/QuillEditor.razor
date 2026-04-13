@@ -3,6 +3,7 @@
 @using Soenneker.Blazor.Quill.Abstract
 @using Soenneker.Blazor.Quill.Dtos
 @using Soenneker.Blazor.Quill.Options
+@using Soenneker.Blazor.Utils.Ids
 
 @inject IQuillInterop QuillInterop
 @implements IAsyncDisposable
@@ -70,7 +71,7 @@
 
     protected override void OnParametersSet()
     {
-        Id ??= $"quill-{Guid.NewGuid():N}";
+        Id ??= BlazorIdGenerator.New("quill");
 
         if (_lastIncomingHtml != Html)
         {
