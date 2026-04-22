@@ -46,7 +46,7 @@
                      OnTextChange="OnTextChanged"
                      OnSelectionChange="OnSelectionChanged" />
 
-        <Div Display="Display.Flex" Flex="Flex.Wrap" Gap="Gap.Is2">
+        <Div Display="Display.Flex" Flex=@("flex-wrap") Gap="Gap.Is2">
             <Button OnClick="SetExampleContent">Set example content</Button>
             <Button OnClick="LoadDeltaContent" Variant="ButtonVariant.Secondary">Load delta JSON</Button>
             <Button OnClick="FocusEditor" Variant="ButtonVariant.Outline">Focus</Button>

@@ -1,20 +1,19 @@
 using Soenneker.Blazor.Quill.Abstract;
-using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.Blazor.Quill.Tests;
 
-[Collection("Collection")]
-public sealed class QuillUtilTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public sealed class QuillUtilTests : HostedUnitTest
 {
     private readonly IQuillUtil _blazorlibrary;
 
-    public QuillUtilTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public QuillUtilTests(Host host) : base(host)
     {
         _blazorlibrary = Resolve<IQuillUtil>(true);
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
 
