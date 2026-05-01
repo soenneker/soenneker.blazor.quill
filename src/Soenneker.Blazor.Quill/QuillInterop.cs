@@ -37,18 +37,10 @@ public sealed class QuillInterop : IQuillInterop
         _moduleInitializer = new AsyncInitializer(InitializeModule);
     }
 
-    private static string NormalizeContentUri(string uri)
-    {
-        if (string.IsNullOrEmpty(uri) || uri.Contains("://", StringComparison.Ordinal))
-            return uri;
-
-        return uri[0] == '/' ? uri : "/" + uri;
-    }
-
     private async ValueTask InitializeScript(bool useCdn, CancellationToken cancellationToken)
     {
         string scriptPath = QuillAssetUtil.GetScriptPath(useCdn);
-        await _resourceLoader.LoadScriptAndWaitForVariable(NormalizeContentUri(scriptPath), _quillVariable, cancellationToken: cancellationToken);
+        await _resourceLoader.LoadScriptAndWaitForVariable(scriptPath, _quillVariable, cancellationToken: cancellationToken);
     }
 
     private async ValueTask InitializeModule(CancellationToken cancellationToken)
@@ -70,7 +62,7 @@ public sealed class QuillInterop : IQuillInterop
             if (_loadedStyles.Contains(stylePath))
                 return;
 
-            await _resourceLoader.LoadStyle(NormalizeContentUri(stylePath), cancellationToken: cancellationToken);
+            await _resourceLoader.LoadStyle(stylePath, cancellationToken: cancellationToken);
             _loadedStyles.Add(stylePath);
         }
         finally
