@@ -18,85 +18,57 @@
     }
 </style>
 
-<Div Space="Space.Y.Is6">
-    <Div Space="Space.Y.Is2">
-        <Div TextSize="TextSize.ThreeXl" FontWeight="FontWeight.Bold">Quill Editor</Div>
-        <Paragraph Margin="Margin.Is0" TextSize="TextSize.Sm" TextColor="TextColor.MutedForeground">
+<Div Space="Space.Y.Is6" >
+    <Div Space="Space.Y.Is2" >
+        <Div TextSize="TextSize.ThreeXl" FontWeight="FontWeight.Bold" >Quill Editor</Div>
+        <Paragraph Margin="Margin.Is0" TextSize="TextSize.Sm" TextColor="TextColor.MutedForeground" >
             The editor below is bound to HTML and text, and exposes Quill content and selection changes back into Blazor.
         </Paragraph>
     </Div>
 
-    <Div Rounded="Rounded.Lg"
-         Border="Border.Is1"
-         BorderColor="BorderColor.Border"
-         Padding="Padding.Is4"
-         Space="Space.Y.Is4">
-        <Div Space="Space.Y.Is1">
-            <Div TextSize="TextSize.Lg" FontWeight="FontWeight.Semibold">Editor</Div>
-            <Paragraph Margin="Margin.Is0" TextSize="TextSize.Sm" TextColor="TextColor.MutedForeground">
+    <Div Rounded="Rounded.Lg" Border="Border.Is1" BorderColor="BorderColor.Border" Padding="Padding.Is4" Space="Space.Y.Is4" >
+        <Div Space="Space.Y.Is1" >
+            <Div TextSize="TextSize.Lg" FontWeight="FontWeight.Semibold" >Editor</Div>
+            <Paragraph Margin="Margin.Is0" TextSize="TextSize.Sm" TextColor="TextColor.MutedForeground" >
                 Type directly in the Quill editor or push content from Blazor.
             </Paragraph>
         </Div>
 
-        <QuillEditor @ref="_editor"
-                     Class="demo-quill"
-                     Options="_options"
-                     @bind-Html="_html"
-                     @bind-Text="_text"
-                     OnTextChange="OnTextChanged"
-                     OnSelectionChange="OnSelectionChanged" />
+        <QuillEditor @ref="_editor" Class="demo-quill" Options="_options" @bind-Html="_html" @bind-Text="_text" OnTextChange="OnTextChanged" OnSelectionChange="OnSelectionChanged" />
 
-        <Div Display="Display.Flex" Flex=@("flex-wrap") Gap="Gap.Is2">
-            <Button OnClick="SetExampleContent">Set example content</Button>
-            <Button OnClick="LoadDeltaContent" Variant="ButtonVariant.Secondary">Load delta JSON</Button>
-            <Button OnClick="FocusEditor" Variant="ButtonVariant.Outline">Focus</Button>
-            <Button OnClick="ClearEditor" Variant="ButtonVariant.Destructive">Clear</Button>
+        <Div Display="Display.Flex" Flex=@("flex-wrap") Gap="Gap.Is2" >
+            <Button OnClick="SetExampleContent" >Set example content</Button>
+            <Button OnClick="LoadDeltaContent" Variant="ButtonVariant.Secondary" >Load delta JSON</Button>
+            <Button OnClick="FocusEditor" Variant="ButtonVariant.Outline" >Focus</Button>
+            <Button OnClick="ClearEditor" Variant="ButtonVariant.Destructive" >Clear</Button>
         </Div>
 
-        <Paragraph Margin="Margin.Is0" TextSize="TextSize.Sm" TextColor="TextColor.MutedForeground">
+        <Paragraph Margin="Margin.Is0" TextSize="TextSize.Sm" TextColor="TextColor.MutedForeground" >
             Selection: @(_selectionSummary ?? "none")
         </Paragraph>
     </Div>
 
-    <Grid Columns="Columns.Is1.OnLg.Is2" Gap="Gap.Is4">
-        <Div Rounded="Rounded.Lg"
-             Border="Border.Is1"
-             BorderColor="BorderColor.Border"
-             Padding="Padding.Is4"
-             Space="Space.Y.Is3">
-            <Div Space="Space.Y.Is1">
-                <Div TextSize="TextSize.Lg" FontWeight="FontWeight.Semibold">Plain text</Div>
-                <Paragraph Margin="Margin.Is0" TextSize="TextSize.Sm" TextColor="TextColor.MutedForeground">
+    <Grid Gap="Gap.Is4" >
+        <Div Rounded="Rounded.Lg" Border="Border.Is1" BorderColor="BorderColor.Border" Padding="Padding.Is4" Space="Space.Y.Is3" >
+            <Div Space="Space.Y.Is1" >
+                <Div TextSize="TextSize.Lg" FontWeight="FontWeight.Semibold" >Plain text</Div>
+                <Paragraph Margin="Margin.Is0" TextSize="TextSize.Sm" TextColor="TextColor.MutedForeground" >
                     The latest plain-text value from Quill.
                 </Paragraph>
             </Div>
-            <Div Rounded="Rounded.Md"
-                 Border="Border.Is1"
-                 BorderColor="BorderColor.Border"
-                 BackgroundColor="BackgroundColor.Muted"
-                 Padding="Padding.Is4"
-                 Class="demo-quill-output">
+            <Div Rounded="Rounded.Md" Border="Border.Is1" BorderColor="BorderColor.Border" BackgroundColor="BackgroundColor.Muted" Padding="Padding.Is4" Class="demo-quill-output" >
                 @(_text ?? string.Empty)
             </Div>
         </Div>
 
-        <Div Rounded="Rounded.Lg"
-             Border="Border.Is1"
-             BorderColor="BorderColor.Border"
-             Padding="Padding.Is4"
-             Space="Space.Y.Is3">
-            <Div Space="Space.Y.Is1">
-                <Div TextSize="TextSize.Lg" FontWeight="FontWeight.Semibold">Rendered HTML</Div>
-                <Paragraph Margin="Margin.Is0" TextSize="TextSize.Sm" TextColor="TextColor.MutedForeground">
+        <Div Rounded="Rounded.Lg" Border="Border.Is1" BorderColor="BorderColor.Border" Padding="Padding.Is4" Space="Space.Y.Is3" >
+            <Div Space="Space.Y.Is1" >
+                <Div TextSize="TextSize.Lg" FontWeight="FontWeight.Semibold" >Rendered HTML</Div>
+                <Paragraph Margin="Margin.Is0" TextSize="TextSize.Sm" TextColor="TextColor.MutedForeground" >
                     The latest HTML generated by Quill.
                 </Paragraph>
             </Div>
-            <Div Rounded="Rounded.Md"
-                 Border="Border.Is1"
-                 BorderColor="BorderColor.Border"
-                 BackgroundColor="BackgroundColor.Muted"
-                 Padding="Padding.Is4"
-                 Class="demo-quill-output">
+            <Div Rounded="Rounded.Md" Border="Border.Is1" BorderColor="BorderColor.Border" BackgroundColor="BackgroundColor.Muted" Padding="Padding.Is4" Class="demo-quill-output" >
                 @(_html ?? string.Empty)
             </Div>
         </Div>
@@ -117,10 +89,10 @@
         {
             ["toolbar"] = new object[]
             {
-                new[] {"bold", "italic", "underline"},
-                new[] {"blockquote", "code-block"},
-                new[] {"link", "image"},
-                new[] {"clean"}
+                new[] { "bold", "italic", "underline" },
+                new[] { "blockquote", "code-block" },
+                new[] { "link", "image" },
+                new[] { "clean" }
             }
         }
     };
@@ -168,4 +140,5 @@
         if (_editor != null)
             await _editor.Clear();
     }
+
 }
