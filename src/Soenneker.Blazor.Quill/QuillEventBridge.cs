@@ -21,18 +21,32 @@ public sealed class QuillEventBridge
         _onSelectionChanged = onSelectionChanged;
     }
 
+    /// <summary>
+    /// Executes the on ready operation.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     [JSInvokable]
     public Task OnReady()
     {
         return _onReady.Invoke().AsTask();
     }
 
+    /// <summary>
+    /// Executes the on text changed operation.
+    /// </summary>
+    /// <param name="change">The change.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     [JSInvokable]
     public Task OnTextChanged(QuillTextChange change)
     {
         return _onTextChanged.Invoke(change).AsTask();
     }
 
+    /// <summary>
+    /// Executes the on selection changed operation.
+    /// </summary>
+    /// <param name="change">The change.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     [JSInvokable]
     public Task OnSelectionChanged(QuillSelectionChange change)
     {
