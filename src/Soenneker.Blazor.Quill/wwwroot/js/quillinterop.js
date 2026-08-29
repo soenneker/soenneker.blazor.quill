@@ -104,11 +104,11 @@ export function create(elementId, dotNetReference, options) {
     });
 
     const onTextChange = (delta, oldDelta, source) => {
-        dotNetReference.invokeMethodAsync("OnTextChanged", toTextChangePayload(quill, delta, oldDelta, source));
+        dotNetReference.invokeMethodAsync("OnTextChanged", toTextChangePayload(quill, delta, oldDelta, source)).catch(console.error);
     };
 
     const onSelectionChange = (range, oldRange, source) => {
-        dotNetReference.invokeMethodAsync("OnSelectionChanged", toSelectionChangePayload(range, oldRange, source));
+        dotNetReference.invokeMethodAsync("OnSelectionChanged", toSelectionChangePayload(range, oldRange, source)).catch(console.error);
     };
 
     quill.on("text-change", onTextChange);
@@ -121,7 +121,7 @@ export function create(elementId, dotNetReference, options) {
         dotNetReference
     });
 
-    dotNetReference.invokeMethodAsync("OnReady");
+    dotNetReference.invokeMethodAsync("OnReady").catch(console.error);
 }
 
 export function destroy(elementId) {

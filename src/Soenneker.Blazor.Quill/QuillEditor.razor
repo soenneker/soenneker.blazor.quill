@@ -114,17 +114,28 @@
         if (options != null)
             Options = options;
 
+        _eventBridgeReference?.Dispose();
         _eventBridge = new QuillEventBridge(HandleReady, HandleTextChanged, HandleSelectionChanged);
         _eventBridgeReference = DotNetObjectReference.Create(_eventBridge);
 
         CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
 
-        using (source)
+        try
         {
-            await QuillInterop.Create(Id!, _eventBridgeReference, Options, linked);
-            _created = true;
+            using (source)
+            {
+                await QuillInterop.Create(Id!, _eventBridgeReference, Options, linked);
+                _created = true;
 
-            await ApplyInitialValue(linked);
+                await ApplyInitialValue(linked);
+            }
+        }
+        catch
+        {
+            _eventBridgeReference.Dispose();
+            _eventBridgeReference = null;
+            _eventBridge = null;
+            throw;
         }
     }
 
