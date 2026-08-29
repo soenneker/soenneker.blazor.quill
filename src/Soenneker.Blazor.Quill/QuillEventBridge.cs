@@ -22,9 +22,9 @@ public sealed class QuillEventBridge
     }
 
     /// <summary>
-    /// Executes the on ready operation.
+    /// Responds when ready occurs.
     /// </summary>
-    /// <returns>A task that represents the asynchronous operation.</returns>
+    /// <returns>A task that completes when the on ready operation is complete.</returns>
     [JSInvokable]
     public Task OnReady()
     {
@@ -32,10 +32,10 @@ public sealed class QuillEventBridge
     }
 
     /// <summary>
-    /// Executes the on text changed operation.
+    /// Responds when text changed occurs.
     /// </summary>
-    /// <param name="change">The change.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
+    /// <param name="change">Change for the on text changed operation.</param>
+    /// <returns>A task that completes when the on text changed operation is complete.</returns>
     [JSInvokable]
     public Task OnTextChanged(QuillTextChange change)
     {
@@ -43,10 +43,10 @@ public sealed class QuillEventBridge
     }
 
     /// <summary>
-    /// Executes the on selection changed operation.
+    /// Responds when selection changed occurs.
     /// </summary>
-    /// <param name="change">The change.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
+    /// <param name="change">Change for the on selection changed operation.</param>
+    /// <returns>A task that completes when the on selection changed operation is complete.</returns>
     [JSInvokable]
     public Task OnSelectionChanged(QuillSelectionChange change)
     {

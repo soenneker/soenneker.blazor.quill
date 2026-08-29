@@ -13,6 +13,8 @@ public static class QuillUtilRegistrar
     /// <summary>
     /// Adds <see cref="IQuillInterop"/> as a scoped service.
     /// </summary>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddQuillInteropAsScoped(this IServiceCollection services)
     {
         services.AddResourceLoaderAsScoped()
@@ -24,6 +26,8 @@ public static class QuillUtilRegistrar
     /// <summary>
     /// Adds <see cref="IQuillInterop"/> and <see cref="IQuillUtil"/> as scoped services.
     /// </summary>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddQuillUtilAsScoped(this IServiceCollection services)
     {
         services.AddQuillInteropAsScoped();
