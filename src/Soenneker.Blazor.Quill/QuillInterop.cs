@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.JSInterop;
 using Soenneker.Asyncs.Initializers;
+using Soenneker.Asyncs.Locks;
 using Soenneker.Blazor.Quill.Abstract;
 using Soenneker.Blazor.Quill.Dtos;
 using Soenneker.Blazor.Quill.Options;
@@ -26,7 +27,7 @@ public sealed class QuillInterop : IQuillInterop
     private readonly AsyncInitializer<bool> _scriptInitializer;
     private readonly AsyncInitializer _moduleInitializer;
     private readonly HashSet<string> _loadedStyles = [];
-    private readonly SemaphoreSlim _styleSemaphore = new(1, 1);
+    private readonly AsyncLock _styleLock = new();
     private readonly CancellationScope _cancellationScope = new();
 
     public QuillInterop(IResourceLoader resourceLoader, IModuleImportUtil moduleImportUtil)
@@ -55,19 +56,13 @@ public sealed class QuillInterop : IQuillInterop
         if (stylePath == null)
             return;
 
-        await _styleSemaphore.WaitAsync(cancellationToken);
-
-        try
+        using (await _styleLock.Lock(cancellationToken))
         {
             if (_loadedStyles.Contains(stylePath))
                 return;
 
             await _resourceLoader.LoadStyle(stylePath, cancellationToken: cancellationToken);
             _loadedStyles.Add(stylePath);
-        }
-        finally
-        {
-            _styleSemaphore.Release();
         }
     }
 
@@ -241,7 +236,7 @@ public sealed class QuillInterop : IQuillInterop
     /// <returns>A task that represents the asynchronous operation.</returns>
     public async ValueTask DisposeAsync()
     {
-        _styleSemaphore.Dispose();
+        await _styleLock.DisposeAsync();
         await _moduleImportUtil.DisposeContentModule(_modulePath);
         await _scriptInitializer.DisposeAsync();
         await _moduleInitializer.DisposeAsync();
