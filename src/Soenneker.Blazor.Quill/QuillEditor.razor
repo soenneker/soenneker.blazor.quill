@@ -1,4 +1,5 @@
 @using System.Threading
+@using Soenneker.Extensions.CancellationTokens
 @using Microsoft.JSInterop
 @using Soenneker.Blazor.Quill.Abstract
 @using Soenneker.Blazor.Quill.Dtos
@@ -118,7 +119,7 @@
         _eventBridge = new QuillEventBridge(HandleReady, HandleTextChanged, HandleSelectionChanged);
         _eventBridgeReference = DotNetObjectReference.Create(_eventBridge);
 
-        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource? source);
 
         try
         {
@@ -143,7 +144,7 @@
     {
         EnsureCreated();
 
-        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource? source);
 
         using (source)
             return await QuillInterop.GetHtml(Id!, linked);
@@ -153,7 +154,7 @@
     {
         EnsureCreated();
 
-        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource? source);
 
         using (source)
             return await QuillInterop.GetText(Id!, linked);
@@ -163,7 +164,7 @@
     {
         EnsureCreated();
 
-        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource? source);
 
         using (source)
             return await QuillInterop.GetContents(Id!, linked);
@@ -173,7 +174,7 @@
     {
         EnsureCreated();
 
-        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource linkedSource);
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource? linkedSource);
 
         using (linkedSource)
         {
@@ -186,7 +187,7 @@
     {
         EnsureCreated();
 
-        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource linkedSource);
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource? linkedSource);
 
         using (linkedSource)
         {
@@ -199,7 +200,7 @@
     {
         EnsureCreated();
 
-        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource linkedSource);
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource? linkedSource);
 
         using (linkedSource)
         {
@@ -217,7 +218,7 @@
     {
         EnsureCreated();
 
-        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource? source);
 
         using (source)
             await QuillInterop.Focus(Id!, linked);
@@ -227,7 +228,7 @@
     {
         EnsureCreated();
 
-        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource? source);
 
         using (source)
             await QuillInterop.Blur(Id!, linked);
@@ -237,7 +238,7 @@
     {
         EnsureCreated();
 
-        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource? source);
 
         using (source)
             await QuillInterop.Enable(Id!, enabled, linked);
@@ -247,7 +248,7 @@
     {
         EnsureCreated();
 
-        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource source);
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource? source);
 
         using (source)
             return await QuillInterop.GetSelection(Id!, linked);
@@ -257,7 +258,7 @@
     {
         EnsureCreated();
 
-        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource linkedSource);
+        CancellationToken linked = LinkCancellationToken(cancellationToken, out CancellationTokenSource? linkedSource);
 
         using (linkedSource)
             await QuillInterop.SetSelection(Id!, index, length, source, linked);
@@ -362,10 +363,9 @@
         EnsureCreated(_created, Id!);
     }
 
-    private CancellationToken LinkCancellationToken(CancellationToken cancellationToken, out CancellationTokenSource source)
+    private CancellationToken LinkCancellationToken(CancellationToken cancellationToken, out CancellationTokenSource? source)
     {
-        source = CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token, cancellationToken);
-        return source.Token;
+        return _cancellationTokenSource.Token.Link(cancellationToken, out source);
     }
 
     public async ValueTask DisposeAsync()
