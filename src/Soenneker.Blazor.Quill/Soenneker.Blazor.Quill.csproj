@@ -43,7 +43,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components" Version="10.0.12" />
-        <PackageReference Include="Soenneker.Asyncs.Initializers" Version="4.0.104" />
+        <PackageReference Include="Soenneker.Asyncs.Initializers" Version="4.0.106" />
         <PackageReference Include="Soenneker.Blazor.Utils.ResourceLoader" Version="4.0.1760" />
     </ItemGroup>
 </Project>
