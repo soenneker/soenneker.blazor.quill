@@ -7,7 +7,7 @@ namespace Soenneker.Blazor.Quill.Tests;
 public sealed class QuillEventBridgeTests
 {
     [Test]
-    public async Task OnReady_ShouldInvokeCallback()
+    public async ValueTask OnReady_ShouldInvokeCallback()
     {
         var called = false;
         var bridge = new QuillEventBridge(() =>
@@ -22,7 +22,7 @@ public sealed class QuillEventBridgeTests
     }
 
     [Test]
-    public async Task OnTextChanged_ShouldPassChangeToCallback()
+    public async ValueTask OnTextChanged_ShouldPassChangeToCallback()
     {
         QuillTextChange? received = null;
         var expected = new QuillTextChange
@@ -45,7 +45,7 @@ public sealed class QuillEventBridgeTests
     }
 
     [Test]
-    public async Task OnSelectionChanged_ShouldPassChangeToCallback()
+    public async ValueTask OnSelectionChanged_ShouldPassChangeToCallback()
     {
         QuillSelectionChange? received = null;
         var expected = new QuillSelectionChange
