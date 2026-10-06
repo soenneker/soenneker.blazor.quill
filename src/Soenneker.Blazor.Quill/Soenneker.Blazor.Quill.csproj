@@ -46,4 +46,7 @@
         <PackageReference Include="Soenneker.Asyncs.Initializers" Version="4.0.108" />
         <PackageReference Include="Soenneker.Blazor.Utils.ResourceLoader" Version="4.0.1768" />
     </ItemGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="Soenneker.Blazor.Quill.TrimSmoke" />
+    </ItemGroup>
 </Project>

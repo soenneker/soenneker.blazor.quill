@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System;
 using System.Threading.Tasks;
 using Microsoft.JSInterop;
@@ -31,23 +32,31 @@ public sealed class QuillEventBridge
         return _onReady.Invoke().AsTask();
     }
 
-    /// <summary>
-    /// Responds when text changed occurs.
-    /// </summary>
-    /// <param name="change">Change for the on text changed operation.</param>
-    /// <returns>A task that completes when the on text changed operation is complete.</returns>
-    [JSInvokable]
+    /// <summary>Receives a JavaScript text event using generated JSON metadata.</summary>
+    /// <param name="payload">The event payload from JavaScript.</param>
+    /// <returns>A task that completes when the callback completes.</returns>
+    [JSInvokable("OnTextChanged")]
+    public Task OnTextChangedFromJson(JsonElement payload) =>
+        OnTextChanged(payload.Deserialize(InteropJsonContext.Default.QuillTextChange)!);
+
+    /// <summary>Invokes the text change callback.</summary>
+    /// <param name="change">The editor change.</param>
+    /// <returns>A task that completes when the callback completes.</returns>
     public Task OnTextChanged(QuillTextChange change)
     {
         return _onTextChanged.Invoke(change).AsTask();
     }
 
-    /// <summary>
-    /// Responds when selection changed occurs.
-    /// </summary>
-    /// <param name="change">Change for the on selection changed operation.</param>
-    /// <returns>A task that completes when the on selection changed operation is complete.</returns>
-    [JSInvokable]
+    /// <summary>Receives a JavaScript selection event using generated JSON metadata.</summary>
+    /// <param name="payload">The event payload from JavaScript.</param>
+    /// <returns>A task that completes when the callback completes.</returns>
+    [JSInvokable("OnSelectionChanged")]
+    public Task OnSelectionChangedFromJson(JsonElement payload) =>
+        OnSelectionChanged(payload.Deserialize(InteropJsonContext.Default.QuillSelectionChange)!);
+
+    /// <summary>Invokes the selection change callback.</summary>
+    /// <param name="change">The editor change.</param>
+    /// <returns>A task that completes when the callback completes.</returns>
     public Task OnSelectionChanged(QuillSelectionChange change)
     {
         return _onSelectionChanged.Invoke(change).AsTask();

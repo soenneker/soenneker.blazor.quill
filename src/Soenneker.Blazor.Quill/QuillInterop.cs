@@ -1,3 +1,6 @@
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+using System.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -22,6 +25,7 @@ public sealed class QuillInterop : IQuillInterop
     private const string _modulePath = "_content/Soenneker.Blazor.Quill/js/quillinterop.js";
     private const string _quillVariable = "Quill";
 
+    private readonly JsonSerializerOptions _jsonOptions;
     private readonly IResourceLoader _resourceLoader;
     private readonly IModuleImportUtil _moduleImportUtil;
     private readonly AsyncInitializer<bool> _scriptInitializer;
@@ -30,8 +34,9 @@ public sealed class QuillInterop : IQuillInterop
     private readonly AsyncLock _styleLock = new();
     private readonly CancellationScope _cancellationScope = new();
 
-    public QuillInterop(IResourceLoader resourceLoader, IModuleImportUtil moduleImportUtil)
+    public QuillInterop(IResourceLoader resourceLoader, IModuleImportUtil moduleImportUtil, JsonSerializerContext? jsonContext = null)
     {
+        _jsonOptions = InteropJsonContext.WithContext(jsonContext);
         _resourceLoader = resourceLoader;
         _moduleImportUtil = moduleImportUtil;
         _scriptInitializer = new AsyncInitializer<bool>(InitializeScript);
@@ -94,7 +99,8 @@ public sealed class QuillInterop : IQuillInterop
             await EnsureStyleLoaded(options.Theme, options.UseCdn, linked);
 
             IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            await module.InvokeVoidAsync("create", linked, elementId, dotNetReference, options);
+            await module.InvokeVoidAsync("create", linked, elementId, dotNetReference,
+                JsonSerializer.SerializeToElement(options, (JsonTypeInfo<QuillOptions>)_jsonOptions.GetTypeInfo(typeof(QuillOptions))));
         }
     }
 
@@ -215,7 +221,8 @@ public sealed class QuillInterop : IQuillInterop
         using (source)
         {
             IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            return await module.InvokeAsync<QuillSelectionRange?>("getSelection", linked, elementId);
+            JsonElement payload = await module.InvokeAsync<JsonElement>("getSelection", linked, elementId);
+            return payload.Deserialize(InteropJsonContext.Default.QuillSelectionRange);
         }
     }
 
