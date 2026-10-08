@@ -37,7 +37,7 @@ public sealed class QuillUtilTests : HostedUnitTest
     }
 
     [Test]
-    public async ValueTask Initialize_ShouldDelegateToInterop()
+    public async ValueTask Initialize_ShouldDelegateToInterop(CancellationToken cancellationToken)
     {
         var interop = new TrackingQuillInterop();
         var util = new QuillUtil(interop);
