@@ -92,15 +92,22 @@ public sealed class QuillInterop : IQuillInterop
 
         using (source)
         {
-            options ??= new QuillOptions();
+            try
+            {
+                options ??= new QuillOptions();
 
-            await _scriptInitializer.Init(options.UseCdn, linked);
-            await _moduleInitializer.Init(linked);
-            await EnsureStyleLoaded(options.Theme, options.UseCdn, linked);
+                await _scriptInitializer.Init(options.UseCdn, linked);
+                await _moduleInitializer.Init(linked);
+                await EnsureStyleLoaded(options.Theme, options.UseCdn, linked);
 
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            await module.InvokeVoidAsync("create", linked, elementId, dotNetReference,
-                JsonSerializer.SerializeToElement(options, (JsonTypeInfo<QuillOptions>)_jsonOptions.GetTypeInfo(typeof(QuillOptions))));
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                await module.InvokeVoidAsync("create", linked, elementId, dotNetReference,
+                    JsonSerializer.SerializeToElement(options, (JsonTypeInfo<QuillOptions>)_jsonOptions.GetTypeInfo(typeof(QuillOptions))));
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'QuillInterop.Create' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -110,8 +117,15 @@ public sealed class QuillInterop : IQuillInterop
 
         using (source)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            await module.InvokeVoidAsync("destroy", linked, elementId);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                await module.InvokeVoidAsync("destroy", linked, elementId);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'QuillInterop.Destroy' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -121,8 +135,15 @@ public sealed class QuillInterop : IQuillInterop
 
         using (source)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            return await module.InvokeAsync<string?>("getHtml", linked, elementId);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                return await module.InvokeAsync<string?>("getHtml", linked, elementId);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'QuillInterop.GetHtml' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -132,8 +153,15 @@ public sealed class QuillInterop : IQuillInterop
 
         using (cancellationSource)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            await module.InvokeVoidAsync("setHtml", linked, elementId, html, source);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                await module.InvokeVoidAsync("setHtml", linked, elementId, html, source);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'QuillInterop.SetHtml' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -143,8 +171,15 @@ public sealed class QuillInterop : IQuillInterop
 
         using (source)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            return await module.InvokeAsync<string>("getText", linked, elementId);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                return await module.InvokeAsync<string>("getText", linked, elementId);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'QuillInterop.GetText' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -154,8 +189,15 @@ public sealed class QuillInterop : IQuillInterop
 
         using (cancellationSource)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            await module.InvokeVoidAsync("setText", linked, elementId, text, source);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                await module.InvokeVoidAsync("setText", linked, elementId, text, source);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'QuillInterop.SetText' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -165,8 +207,15 @@ public sealed class QuillInterop : IQuillInterop
 
         using (source)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            return await module.InvokeAsync<string>("getContents", linked, elementId);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                return await module.InvokeAsync<string>("getContents", linked, elementId);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'QuillInterop.GetContents' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -176,8 +225,15 @@ public sealed class QuillInterop : IQuillInterop
 
         using (cancellationSource)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            await module.InvokeVoidAsync("setContents", linked, elementId, contentsJson, source);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                await module.InvokeVoidAsync("setContents", linked, elementId, contentsJson, source);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'QuillInterop.SetContents' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -187,8 +243,15 @@ public sealed class QuillInterop : IQuillInterop
 
         using (source)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            await module.InvokeVoidAsync("enable", linked, elementId, enabled);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                await module.InvokeVoidAsync("enable", linked, elementId, enabled);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'QuillInterop.Enable' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -198,8 +261,15 @@ public sealed class QuillInterop : IQuillInterop
 
         using (source)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            await module.InvokeVoidAsync("focus", linked, elementId);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                await module.InvokeVoidAsync("focus", linked, elementId);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'QuillInterop.Focus' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -209,8 +279,15 @@ public sealed class QuillInterop : IQuillInterop
 
         using (source)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            await module.InvokeVoidAsync("blur", linked, elementId);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                await module.InvokeVoidAsync("blur", linked, elementId);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'QuillInterop.Blur' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -220,9 +297,16 @@ public sealed class QuillInterop : IQuillInterop
 
         using (source)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            JsonElement payload = await module.InvokeAsync<JsonElement>("getSelection", linked, elementId);
-            return payload.Deserialize(InteropJsonContext.Default.QuillSelectionRange);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                JsonElement payload = await module.InvokeAsync<JsonElement>("getSelection", linked, elementId);
+                return payload.Deserialize(InteropJsonContext.Default.QuillSelectionRange);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'QuillInterop.GetSelection' failed: {exception.Message}", exception);
+            }
         }
     }
 
@@ -232,8 +316,15 @@ public sealed class QuillInterop : IQuillInterop
 
         using (cancellationSource)
         {
-            IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
-            await module.InvokeVoidAsync("setSelection", linked, elementId, index, length, source);
+            try
+            {
+                IJSObjectReference module = await _moduleImportUtil.GetContentModuleReference(_modulePath, linked);
+                await module.InvokeVoidAsync("setSelection", linked, elementId, index, length, source);
+            }
+            catch (JSException exception)
+            {
+                throw new JSException($"JavaScript operation 'QuillInterop.SetSelection' failed: {exception.Message}", exception);
+            }
         }
     }
 
