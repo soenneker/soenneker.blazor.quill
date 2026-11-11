@@ -46,7 +46,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components" Version="11.0.0" />
-        <PackageReference Include="Soenneker.Asyncs.Initializers" Version="11.0.139" />
+        <PackageReference Include="Soenneker.Asyncs.Initializers" Version="11.0.140" />
         <PackageReference Include="Soenneker.Blazor.Utils.ResourceLoader" Version="11.0.1828" />
     </ItemGroup>
     <ItemGroup>
@@ -56,6 +56,6 @@
         <PackageReference Include="Soenneker.Blazor.Extensions.IJSObjectReferences" Version="11.0.6" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Soenneker.Gen.Web.Minifier" Version="11.0.59" PrivateAssets="all" />
+        <PackageReference Include="Soenneker.Gen.Web.Minifier" Version="11.0.60" PrivateAssets="all" />
     </ItemGroup>
 </Project>
